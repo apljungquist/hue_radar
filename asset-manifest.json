@@ -1,0 +1,22 @@
+{
+  "files": {
+    "main.css": "/hue_rose/static/css/main.61dcfbed.chunk.css",
+    "main.js": "/hue_rose/static/js/main.d291f66e.chunk.js",
+    "main.js.map": "/hue_rose/static/js/main.d291f66e.chunk.js.map",
+    "runtime-main.js": "/hue_rose/static/js/runtime-main.75e5dcce.js",
+    "runtime-main.js.map": "/hue_rose/static/js/runtime-main.75e5dcce.js.map",
+    "static/js/2.a5610667.chunk.js": "/hue_rose/static/js/2.a5610667.chunk.js",
+    "static/js/2.a5610667.chunk.js.map": "/hue_rose/static/js/2.a5610667.chunk.js.map",
+    "static/js/3.bb68ecb3.chunk.js": "/hue_rose/static/js/3.bb68ecb3.chunk.js",
+    "static/js/3.bb68ecb3.chunk.js.map": "/hue_rose/static/js/3.bb68ecb3.chunk.js.map",
+    "index.html": "/hue_rose/index.html",
+    "static/css/main.61dcfbed.chunk.css.map": "/hue_rose/static/css/main.61dcfbed.chunk.css.map",
+    "static/js/2.a5610667.chunk.js.LICENSE.txt": "/hue_rose/static/js/2.a5610667.chunk.js.LICENSE.txt"
+  },
+  "entrypoints": [
+    "static/js/runtime-main.75e5dcce.js",
+    "static/js/2.a5610667.chunk.js",
+    "static/css/main.61dcfbed.chunk.css",
+    "static/js/main.d291f66e.chunk.js"
+  ]
+}
