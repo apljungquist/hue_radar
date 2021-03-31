@@ -1,22 +1,22 @@
 {
   "files": {
-    "main.css": "/hue_rose/static/css/main.91f58989.chunk.css",
-    "main.js": "/hue_rose/static/js/main.70a087eb.chunk.js",
-    "main.js.map": "/hue_rose/static/js/main.70a087eb.chunk.js.map",
+    "main.css": "/hue_rose/static/css/main.bee82608.chunk.css",
+    "main.js": "/hue_rose/static/js/main.be807a81.chunk.js",
+    "main.js.map": "/hue_rose/static/js/main.be807a81.chunk.js.map",
     "runtime-main.js": "/hue_rose/static/js/runtime-main.4f07c45f.js",
     "runtime-main.js.map": "/hue_rose/static/js/runtime-main.4f07c45f.js.map",
-    "static/js/2.a368157a.chunk.js": "/hue_rose/static/js/2.a368157a.chunk.js",
-    "static/js/2.a368157a.chunk.js.map": "/hue_rose/static/js/2.a368157a.chunk.js.map",
+    "static/js/2.2f97f17e.chunk.js": "/hue_rose/static/js/2.2f97f17e.chunk.js",
+    "static/js/2.2f97f17e.chunk.js.map": "/hue_rose/static/js/2.2f97f17e.chunk.js.map",
     "static/js/3.9b7fd75c.chunk.js": "/hue_rose/static/js/3.9b7fd75c.chunk.js",
     "static/js/3.9b7fd75c.chunk.js.map": "/hue_rose/static/js/3.9b7fd75c.chunk.js.map",
     "index.html": "/hue_rose/index.html",
-    "static/css/main.91f58989.chunk.css.map": "/hue_rose/static/css/main.91f58989.chunk.css.map",
-    "static/js/2.a368157a.chunk.js.LICENSE.txt": "/hue_rose/static/js/2.a368157a.chunk.js.LICENSE.txt"
+    "static/css/main.bee82608.chunk.css.map": "/hue_rose/static/css/main.bee82608.chunk.css.map",
+    "static/js/2.2f97f17e.chunk.js.LICENSE.txt": "/hue_rose/static/js/2.2f97f17e.chunk.js.LICENSE.txt"
   },
   "entrypoints": [
     "static/js/runtime-main.4f07c45f.js",
-    "static/js/2.a368157a.chunk.js",
-    "static/css/main.91f58989.chunk.css",
-    "static/js/main.70a087eb.chunk.js"
+    "static/js/2.2f97f17e.chunk.js",
+    "static/css/main.bee82608.chunk.css",
+    "static/js/main.be807a81.chunk.js"
   ]
 }
