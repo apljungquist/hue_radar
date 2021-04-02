@@ -23,10 +23,14 @@ const Canvas = (props: { img: ImageData }) => {
 }
 
 const imageData = (img: HTMLImageElement) => {
+    const scale = Math.max(1, img.width * img.height / 5e5);
+    const width = Math.floor(img.width / scale);
+    const height = Math.floor(img.height / scale);
+
     let cvs = document.createElement('canvas');
-    cvs.width = img.width;
-    cvs.height = img.height;
     let ctx = cvs.getContext('2d')!;
+    cvs.width = width;
+    cvs.height = height;
     ctx.drawImage(img, 0, 0, cvs.width, cvs.height);
     return ctx.getImageData(0, 0, cvs.width, cvs.height);
 }
