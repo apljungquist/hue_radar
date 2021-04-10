@@ -1,11 +1,12 @@
+/* eslint-disable import/no-webpack-loader-syntax */
 import React, {useEffect, useRef, useState} from 'react';
 import './App.scss';
 import Chart from 'chart.js';
-
 import * as bs from "react-bootstrap";
-import {convert, floatImage2imageData, imageData2floatImage} from "./image";
-import {ColorTuple, hsluvToRgb, rgbToHsluv, rgbToLch} from "hsluv";
-import {roseData, visHue, visWeight, visWeightedHue} from "./rose";
+import {ColorTuple, hsluvToRgb} from "hsluv";
+import Worker from 'worker-loader!./worker';
+import {WorkerApi} from './worker';
+import * as Comlink from 'comlink';
 
 const fallbackURL = process.env.PUBLIC_URL + '/mm5a7753.jpg';
 
@@ -35,44 +36,60 @@ const imageData = (img: HTMLImageElement) => {
     return ctx.getImageData(0, 0, cvs.width, cvs.height);
 }
 
-const HueRosePlot = (props: { areas: Array<number>, height: number }) => {
-    const numPetal = props.areas.length;
-    const hsluvColors: Array<ColorTuple> = Array.from({length: numPetal}, (_, i) => [360 * i / numPetal, 100, 65]);
-    const csvColors = Array.from(hsluvColors, (hsluv, _) => {
-        const rgb = hsluvToRgb(hsluv);
-        const r = Math.round(rgb[0] * 255);
-        const g = Math.round(rgb[1] * 255);
-        const b = Math.round(rgb[2] * 255);
-        return `rgba(${r}, ${g}, ${b}, 1)`;
-    });
-    const heights = Array.from(props.areas, (a, _) => Math.sqrt(a));
-    const data = {
-        datasets: [{
-            data: Array.from(heights, (v, _) => Math.round(1000 * v) / 1000),
-            backgroundColor: csvColors,
-            borderColor: csvColors,
-            borderWidth: 1,
+interface RoseProps {
+    areas: Array<number> | number,
+}
 
-        }],
-        labels: Array.from({length: numPetal}, (_, i) => Math.round(i / numPetal * 360)),
-    };
-    const canvasRef = useRef<HTMLCanvasElement>(null);
-    useEffect(() => {
-        const canvas = canvasRef.current!;
-        const context = canvas.getContext('2d')!;
-        new Chart(
-            context,
-            {
-                data: data,
+class HueRoseChart extends React.Component<RoseProps, {}> {
+    private ref: React.RefObject<HTMLCanvasElement>;
+    private obj: Chart | null;
+
+    constructor(props: RoseProps) {
+        super(props);
+        this.ref = React.createRef();
+        this.obj = null;
+    }
+
+    data() {
+        const areas = this.props.areas instanceof Array ? this.props.areas : Array.from({length: 12}, (_, i) => i + 1);
+        const numPetal = areas.length;
+        const hsluvColors: Array<ColorTuple> = Array.from({length: numPetal}, (_, i) => [360 * i / numPetal, 100, 65]);
+        const csvColors = Array.from(hsluvColors, (hsluv, _) => {
+            const rgb = hsluvToRgb(hsluv);
+            const r = Math.round(rgb[0] * 255);
+            const g = Math.round(rgb[1] * 255);
+            const b = Math.round(rgb[2] * 255);
+            return `rgba(${r}, ${g}, ${b}, 1)`;
+        });
+        const heights = Array.from(areas, (a, _) => Math.sqrt(a));
+        return {
+            datasets: [{
+                data: Array.from(heights, (v, _) => Math.round(1000 * v) / 1000),
+                backgroundColor: csvColors,
+                borderColor: csvColors,
+                borderWidth: 1,
+
+            }],
+            labels: Array.from({length: numPetal}, (_, i) => Math.round(i / numPetal * 360)),
+        };
+    }
+
+    componentDidUpdate() {
+        console.log("update");
+        if (this.obj) {
+            this.obj.data = this.data();
+            this.obj.update();
+        }
+    }
+
+    componentDidMount() {
+        console.log("mount");
+        this.obj = new Chart(this.ref.current!, {
+                data: this.data(),
                 type: 'polarArea',
                 options: {
-                    layout: {
-                        padding: {
-                            left: 0,
-                            right: 0,
-                            top: 0,
-                            bottom: 0
-                        }
+                    animation: {
+                        duration: 0
                     },
                     legend: {
                         display: false,
@@ -80,35 +97,60 @@ const HueRosePlot = (props: { areas: Array<number>, height: number }) => {
                     scale: {
                         display: false,
                     },
-                    maintainAspectRatio: false
+                    maintainAspectRatio: true,
+                    responsive: true,
                 },
 
             }
         );
-    })
-    return <canvas ref={canvasRef}/>
+    }
+
+    render() {
+        console.log("render");
+        return <canvas ref={this.ref}/>;
+    }
+}
+
+const imageFromSource = (src: string): Promise<HTMLImageElement> => {
+    return new Promise((resolve, reject) => {
+        let img = new Image();
+        img.src = src;
+        img.onload = (e: Event) => {
+            resolve(img)
+        }
+    });
 }
 
 function App() {
+    const numPetal = 20;
     const [file, setFile] = useState(fallbackURL);
-    const [ready, setReady] = useState(false);
+    const [w, setW] = useState<ImageData | null>(null);
+    const [h, setH] = useState<ImageData | null>(null);
+    const [c, setC] = useState<ImageData | null>(null);
+    const [p, setP] = useState<Array<number> | number>(numPetal);
+
+    useEffect(() => {
+        imageFromSource(file).then((img) => {
+            const worker = new Worker();
+            const obj = Comlink.wrap<WorkerApi>(worker);
+            obj.processImage(
+                // transfer not working because ImageData.data.buffer is resolved to ArrayBufferLike
+                imageData(img),
+                numPetal,
+                Comlink.proxy(setW),
+                Comlink.proxy(setH),
+                Comlink.proxy(setC),
+                Comlink.proxy(setP),
+            );
+        })
+    }, [file])
+
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            setReady(false);
+            // TODO: Cancel worker?
             setFile(URL.createObjectURL(e.target.files[0]));
         }
     };
-    const handleLoad = (e: Event) => {
-        setReady(true);
-    };
-
-    let img = new Image();
-    img.src = file;
-    img.onload = handleLoad;
-
-    const rgb = ready ? imageData2floatImage(imageData(img)) : null;
-    const lch = rgb ? convert(rgb, rgbToLch) : null;
-    const hsluv = rgb ? convert(rgb, rgbToHsluv) : null;
 
     return (
         <div className="App">
@@ -116,9 +158,10 @@ function App() {
                 <bs.Row className="primary">
                     <bs.Col>
                         <bs.Image src={file} fluid={true}/>
+                        {/*{img ? <Canvas img={img}/> : null}*/}
                     </bs.Col>
                     <bs.Col>
-                        {(lch) ? <HueRosePlot areas={roseData(lch, 20)} height={img.height}/> : null}
+                        <HueRoseChart areas={p}/>
                     </bs.Col>
                 </bs.Row>
                 <bs.Row className="align-items-center">
@@ -133,7 +176,7 @@ function App() {
                 <bs.Row className={"secondary"}>
                     <bs.Col>
                         <bs.Figure>
-                            {lch ? <Canvas img={floatImage2imageData(visWeight(lch))}/> : null}
+                            {w ? <Canvas img={w}/> : null}
                             <bs.Figure.Caption>
                                 The <b>chroma</b> is used to give more weight to some pixels than others
                             </bs.Figure.Caption>
@@ -141,7 +184,7 @@ function App() {
                     </bs.Col>
                     <bs.Col>
                         <bs.Figure>
-                            {hsluv ? <Canvas img={floatImage2imageData(visHue(hsluv))}/> : null}
+                            {h ? <Canvas img={h}/> : null}
                             <bs.Figure.Caption>
                                 The <b>hue</b> is not always obvious from the image.
                             </bs.Figure.Caption>
@@ -149,7 +192,7 @@ function App() {
                     </bs.Col>
                     <bs.Col>
                         <bs.Figure>
-                            {(lch) ? <Canvas img={floatImage2imageData(visWeightedHue(lch))}/> : null}
+                            {c ? <Canvas img={c}/> : null}
                             <bs.Figure.Caption>
                                 What the algorithm <em>"sees"</em>.
                             </bs.Figure.Caption>

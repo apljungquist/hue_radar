@@ -13,6 +13,9 @@ img {
 }
 .primary > .col {
   width: 40vw;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
 }
 .secondary > .col {
   width: 25vw;
@@ -20,7 +23,7 @@ img {
 figure {
   width: 100%;
 }
-canvas {
+figure>canvas {
   width: 100%;
   height: 100%;
 }
